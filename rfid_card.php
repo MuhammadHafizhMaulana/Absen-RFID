@@ -20,19 +20,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             die("Connection Failed: " . $conn->connect_error);
         }
 
-        // Simpan UID ke database
+        // Simpan UID ke tabel rfid_card
         $insertQuery = "INSERT INTO rfid_card (uid) VALUES (?)";
         $stmt = $conn->prepare($insertQuery);
         $stmt->bind_param("s", $uid);
 
         if ($stmt->execute()) {
-            echo "UID berhasil disimpan";
+            echo "UID berhasil disimpan ";
+
+            // Cek status pengguna di tabel user
+            $checkQuery = "SELECT status FROM user WHERE uid = ? ORDER BY id DESC LIMIT 1";
+            $stmtCheck = $conn->prepare($checkQuery);
+            $stmtCheck->bind_param("s", $uid);
+            $stmtCheck->execute();
+            $result = $stmtCheck->get_result();
+
+            if ($result->num_rows > 0) {
+                $user = $result->fetch_assoc();
+                $status = $user['status'];
+
+                if ($status === 'login') {
+                    echo "Berhasil Login";
+                } elseif ($status === 'logout') {
+                    echo "Berhasil Checkout";
+                } else {
+                    echo "Status tidak valid";
+                }
+            } else {
+                echo "UID tidak ditemukan di tabel user. Harap registrasi terlebih dahulu.";
+            }
+
+            // Tutup statement check
+            $stmtCheck->close();
         } else {
-            echo "Gagal menyimpan UID: " . $conn->error;
+            echo "Gagal menyimpan UID ke tabel rfid_card: " . $conn->error;
         }
 
-        // Tutup koneksi
+        // Tutup statement insert
         $stmt->close();
+        // Tutup koneksi
         $conn->close();
     } else {
         echo "API Key tidak sama";
