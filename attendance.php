@@ -9,7 +9,10 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 }
 
 // Ambil data absensi
-$query = "SELECT * FROM attendance";
+$query = "SELECT attendance.*, user.nama, user.status
+FROM attendance
+INNER JOIN user ON attendance.uid = user.uid;
+";
 $result = $conn->query($query);
 ?>
 <!DOCTYPE html>
@@ -34,7 +37,10 @@ $result = $conn->query($query);
                         <a class="nav-link" href="admin_dashboard.php">Data User</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="attendance.php">Data Absensi</a>
+                        <a class="nav-link active" href="attendance.php">Data Absensi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link " href="perhitunganWaktu.php">Perhitungan Waktu</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link btn btn-danger text-white" href="logout.php">Logout</a>
@@ -50,9 +56,11 @@ $result = $conn->query($query);
         <table class="table table-striped">
             <thead class="table-primary">
                 <tr>
+                    <th>Nama</th>
                     <th>UID</th>
                     <th>Waktu Check-In</th>
                     <th>Waktu Check-Out</th>
+                    <th>Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -60,9 +68,11 @@ $result = $conn->query($query);
                 <?php if ($result->num_rows > 0): ?>
                     <?php while ($row = $result->fetch_assoc()): ?>
                         <tr>
+                            <td><?= $row['nama']; ?></td>
                             <td><?= $row['uid']; ?></td>
                             <td><?= $row['waktu_checkin']; ?></td>
                             <td><?= $row['waktu_checkout'] ?: '-'; ?></td>
+                            <td><?= $row['status'] ?: '-'; ?></td>
                             <td><a href="deleteAttendance.php?id=<?=$row['id']?>" class="btn btn-danger">Hapus</a></td>
                         </tr>
                     <?php endwhile; ?>

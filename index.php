@@ -22,8 +22,7 @@ if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $uid = $row['uid']; // UID terbaru
     $rfid_card_id = $row['id']; // ID dari tabel rfid_card
-    echo "<p>UID terbaru: " . htmlspecialchars($uid) . "</p>";
-
+   
     // Cek apakah UID sudah terdaftar di tabel user
     $checkQuery = "SELECT * FROM user WHERE uid = ?";
     $stmt = $conn->prepare($checkQuery);
@@ -97,30 +96,19 @@ if ($result->num_rows > 0) {
 // Menutup statement jika didefinisikan
 
 if (isset($stmt) && $stmt) {
-
     $stmt->close();
-
 }
-
 
 if (isset($checkinStmt) && $checkinStmt) {
-
     $checkinStmt->close();
-
 }
-
 
 if (isset($checkoutStmt) && $checkoutStmt) {
-
     $checkoutStmt->close();
-
 }
 
-
 if (isset($updateStatusStmt) && $updateStatusStmt) {
-
     $updateStatusStmt->close();
-
 }
 
 
@@ -135,17 +123,23 @@ function show_message() {
         unset($_SESSION['message']); // Menghapus pesan setelah ditampilkan
     }
 }
+
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Absensi RFID</title>
+    <!-- Refresh halaman setiap 5 detik -->
+    <meta http-equiv="refresh" content="5">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
     <div class="container d-flex flex-column justify-content-center align-items-center vh-100">
         <div class="text-center">
@@ -154,12 +148,13 @@ function show_message() {
             <p class="fs-5 text-muted">Silahkan Tap Kartu Anda</p>
         </div>
 
-        <?php show_message(); ?> <!-- Pemanggilan fungsi di sini hanya sekali -->
+        <?php show_message(); ?>
+        <!-- Pemanggilan fungsi di sini hanya sekali -->
 
         <div class="mt-4">
-            <img src="https://via.placeholder.com/200" alt="RFID Image" class="img-fluid rounded-circle shadow">
+            <img src="./aset/istockphoto-1200536941-612x612.jpg" style="height: 200px;" alt="RFID Image" class="img-fluid rounded-circle shadow">
         </div>
-        
+
         <footer class="mt-5 text-center">
             <p class="text-muted">&copy; <?= date("Y"); ?> Sistem Absensi RFID</p>
         </footer>
@@ -168,4 +163,5 @@ function show_message() {
     <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
