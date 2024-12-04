@@ -4,6 +4,15 @@ session_start();
 // Sertakan config.php untuk koneksi database
 include('config.php');
 
+// Fungsi untuk menghapus UID dari tabel rfid_card
+
+function delete_uid_from_database($conn, $uid) {
+    $deleteQuery = "DELETE FROM rfid_card WHERE uid = ?";
+    $stmt = $conn->prepare($deleteQuery);
+    $stmt->bind_param('s', $uid);
+    return $stmt->execute();
+}
+
 // Mengambil UID terbaru dan ID dari tabel rfid_card
 $query = "SELECT uid, id FROM rfid_card ORDER BY id DESC LIMIT 1";
 $result = $conn->query($query);
@@ -30,8 +39,8 @@ if ($result->num_rows > 0) {
         // Cek apakah UID dan ID dari tabel rfid_card sama
         if ($user['uid'] === $uid && $user['id'] == $rfid_card_id) {
             // Jika UID dan ID sama, kosongkan UID
-            $uid = "";
-            echo "<p>UID dan ID sama, UID telah dikosongkan.</p>";
+            // Hapus UID dari database
+            delete_uid_from_database($conn, $row['uid']);
         } else {
             // Cek status pengguna
             if ($status === 'logout') {
@@ -47,9 +56,12 @@ if ($result->num_rows > 0) {
                     $updateStatusStmt->execute();
 
                     $_SESSION['message'] = "Check-in berhasil!";
-                    $uid = "";
+                    // Hapus UID dari database
+                    delete_uid_from_database($conn, $row['uid']);
                 } else {
                     $_SESSION['message'] = "Gagal melakukan check-in.";
+                    // Hapus UID dari database
+                    delete_uid_from_database($conn, $row['uid']);
                 }
             } else if ($status === 'login') {
                 // Jika status adalah login, lakukan check-out
@@ -64,10 +76,12 @@ if ($result->num_rows > 0) {
                     $updateStatusStmt->execute();
 
                     $_SESSION['message'] = "Check-out berhasil!";
-                    $uid = "";
+                    // Hapus UID dari database
+                    delete_uid_from_database($conn, $row['uid']);
                 } else {
                     $_SESSION['message'] = "Gagal melakukan check-out.";
-                    $uid = "";
+                    // Hapus UID dari database
+                    delete_uid_from_database($conn, $row['uid']);
                 }
             }
         }
@@ -80,8 +94,38 @@ if ($result->num_rows > 0) {
     $_SESSION['message'] = "Tidak ada data UID yang ditemukan.";
 }
 
-// Tutup koneksi
-$stmt->close();
+// Menutup statement jika didefinisikan
+
+if (isset($stmt) && $stmt) {
+
+    $stmt->close();
+
+}
+
+
+if (isset($checkinStmt) && $checkinStmt) {
+
+    $checkinStmt->close();
+
+}
+
+
+if (isset($checkoutStmt) && $checkoutStmt) {
+
+    $checkoutStmt->close();
+
+}
+
+
+if (isset($updateStatusStmt) && $updateStatusStmt) {
+
+    $updateStatusStmt->close();
+
+}
+
+
+// Menutup koneksi database
+
 $conn->close();
 
 // Fungsi untuk menampilkan pesan
